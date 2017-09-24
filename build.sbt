@@ -2,7 +2,7 @@ name := "play-logback-groovy"
 
 organization := "io.tzimisce"
 
-version := "0.2.5+1"
+version := "0.2.5"
 
 scalaVersion := "2.11.11"
 
