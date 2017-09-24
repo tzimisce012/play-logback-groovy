@@ -9,12 +9,12 @@ You have add this dependency to your project:
 
 ```scala
 //for play 2.5
-libraryDependencies += "io.tzimisce" %% "play-logback-groovy" % "0.2.5" 
+libraryDependencies += "com.github.tzimisce012" %% "play-logback-groovy" % "0.2.5" 
 ``` 
 
 ```scala
 //for play 2.6
-libraryDependencies += "io.tzimisce" %% "play-logback-groovy" % "0.2.6" 
+libraryDependencies += "com.github.tzimisce012" %% "play-logback-groovy" % "0.2.6" 
 ``` 
 
 Also, you will have to disable the PlayLogback module as explained [here](https://www.playframework.com/documentation/2.6.x/SettingsLogger#using-a-custom-logging-framework)

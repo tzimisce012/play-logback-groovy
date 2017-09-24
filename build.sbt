@@ -1,6 +1,6 @@
 name := "play-logback-groovy"
 
-organization := "com.github.tzimisce"
+organization := "com.github.tzimisce012"
 
 version := "0.2.5"
 
