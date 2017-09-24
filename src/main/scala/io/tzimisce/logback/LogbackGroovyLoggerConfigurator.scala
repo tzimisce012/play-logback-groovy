@@ -10,27 +10,18 @@ import ch.qos.logback.classic.jul.LevelChangePropagator
 import ch.qos.logback.core.util.StatusPrinter
 import org.slf4j.bridge.SLF4JBridgeHandler
 import org.slf4j.impl.StaticLoggerBinder
-import org.slf4j.{ILoggerFactory, LoggerFactory}
-import play.api.{Environment, LoggerConfigurator, Mode}
+import org.slf4j.ILoggerFactory
+import play.api.libs.logback.LogbackLoggerConfigurator
+import play.api.{Environment, Mode}
 
-class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
+class LogbackGroovyLoggerConfigurator extends LogbackLoggerConfigurator {
 
   def loggerFactory: ILoggerFactory = {
     StaticLoggerBinder.getSingleton.getLoggerFactory
   }
 
-  /**
-    * Initialize the Logger when there's no application ClassLoader available.
-    */
-  def init(rootPath: java.io.File, mode: Mode.Mode): Unit = {
-    val properties = Map("application.home" -> rootPath.getAbsolutePath)
-    val resourceName = if (mode == Mode.Dev) "logback-play-dev.xml" else "logback-play-default.xml"
-    val resourceUrl = Option(this.getClass.getClassLoader.getResource(resourceName))
-    configure(properties, resourceUrl)
-  }
 
-
-  def configure(env: Environment): Unit = {
+  override def configure(env: Environment): Unit = {
     val properties = Map("application.home" -> env.rootPath.getAbsolutePath)
 
     // Get an explicitly configured resource URL
@@ -67,7 +58,7 @@ class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
   }
 
 
-  def configure(properties: Map[String, String], config: Option[URL]): Unit = {
+  override def configure(properties: Map[String, String], config: Option[URL]): Unit = {
 
     loggerFactory.synchronized {
       // Redirect JUL -> SL4FJ
@@ -115,16 +106,6 @@ class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
     frameworkPackages.add(classOf[play.Logger].getName)
     frameworkPackages.add(classOf[play.api.Logger].getName)
 
-
   }
-    /**
-    * Shutdown the logger infrastructure.
-    */
-  def shutdown(): Unit = {
 
-    val ctx = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
-    ctx.stop()
-
-    org.slf4j.bridge.SLF4JBridgeHandler.uninstall()
-  }
 }
