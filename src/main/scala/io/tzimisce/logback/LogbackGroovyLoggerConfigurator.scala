@@ -11,7 +11,7 @@ import ch.qos.logback.core.util.StatusPrinter
 import org.slf4j.bridge.SLF4JBridgeHandler
 import org.slf4j.impl.StaticLoggerBinder
 import org.slf4j.{ILoggerFactory, LoggerFactory}
-import play.api.{Environment, LoggerConfigurator, Mode}
+import play.api.{Configuration, Environment, LoggerConfigurator, Mode}
 
 class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
 
@@ -22,7 +22,11 @@ class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
   /**
     * Initialize the Logger when there's no application ClassLoader available.
     */
-  def init(rootPath: java.io.File, mode: Mode.Mode): Unit = {
+  def init(rootPath: java.io.File, mode: Mode): Unit = {
+
+    // Set the global application mode for logging
+    play.api.Logger.setApplicationMode(mode)
+
     val properties = Map("application.home" -> rootPath.getAbsolutePath)
     val resourceName = if (mode == Mode.Dev) "logback-play-dev.xml" else "logback-play-default.xml"
     val resourceUrl = Option(this.getClass.getClassLoader.getResource(resourceName))
@@ -31,8 +35,10 @@ class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
 
 
   def configure(env: Environment): Unit = {
-    val properties = Map("application.home" -> env.rootPath.getAbsolutePath)
+    configure(env, Configuration.empty, Map.empty)
+  }
 
+  def configure(env: Environment, configuration: Configuration, optionalProperties: Map[String, String]): Unit = {
     // Get an explicitly configured resource URL
     // Fallback to a file in the conf directory if the resource wasn't found on the classpath
     def explicitResourceUrl = sys.props.get("logger.resource").map { r =>
@@ -45,12 +51,6 @@ class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
     // Get an explicitly configured URL
     def explicitUrl = sys.props.get("logger.url").map(new URL(_))
 
-    // application-logger.xml and logger.xml are no longer supported methods for supplying the configuration
-    // Support removed in Play 2.5. This notice can be removed in future versions of Play
-    if (env.resource("application-logger.xml").orElse(env.resource("logger.xml")).isDefined) {
-      System.err.println("application-logger.xml and logger.xml are no longer supported. Please name your file logback.xml");
-    }
-
     // logback.groovy
     def resourceGroovyUrl = env.resource("logback.groovy")
 
@@ -62,6 +62,8 @@ class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
       ))
 
     val configUrl = explicitResourceUrl orElse explicitFileUrl orElse explicitUrl orElse resourceGroovyUrl orElse resourceUrl
+
+    val properties = LoggerConfigurator.generateProperties(env, configuration, optionalProperties)
 
     configure(properties, configUrl)
   }

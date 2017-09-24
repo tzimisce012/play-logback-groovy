@@ -2,11 +2,11 @@ name := "play-logback-groovy"
 
 organization := "io.tzimisce"
 
-version := "0.2.5"
+version := "0.2.6"
 
 scalaVersion := "2.11.11"
 
-libraryDependencies += "com.typesafe.play" % "play_2.11" % "2.5.15"
+libraryDependencies += "com.typesafe.play" % "play_2.11" % "2.6.4"
 
 libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.2.3"
 
