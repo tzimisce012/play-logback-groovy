@@ -9,36 +9,13 @@ import ch.qos.logback.classic.joran.JoranConfigurator
 import ch.qos.logback.classic.jul.LevelChangePropagator
 import ch.qos.logback.core.util.StatusPrinter
 import org.slf4j.bridge.SLF4JBridgeHandler
-import org.slf4j.impl.StaticLoggerBinder
-import org.slf4j.{ILoggerFactory, LoggerFactory}
+import play.api.libs.logback.LogbackLoggerConfigurator
 import play.api.{Configuration, Environment, LoggerConfigurator, Mode}
 
-class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
-
-  def loggerFactory: ILoggerFactory = {
-    StaticLoggerBinder.getSingleton.getLoggerFactory
-  }
-
-  /**
-    * Initialize the Logger when there's no application ClassLoader available.
-    */
-  def init(rootPath: java.io.File, mode: Mode): Unit = {
-
-    // Set the global application mode for logging
-    play.api.Logger.setApplicationMode(mode)
-
-    val properties = Map("application.home" -> rootPath.getAbsolutePath)
-    val resourceName = if (mode == Mode.Dev) "logback-play-dev.xml" else "logback-play-default.xml"
-    val resourceUrl = Option(this.getClass.getClassLoader.getResource(resourceName))
-    configure(properties, resourceUrl)
-  }
+class LogbackGroovyLoggerConfigurator extends LogbackLoggerConfigurator {
 
 
-  def configure(env: Environment): Unit = {
-    configure(env, Configuration.empty, Map.empty)
-  }
-
-  def configure(env: Environment, configuration: Configuration, optionalProperties: Map[String, String]): Unit = {
+  override def configure(env: Environment, configuration: Configuration, optionalProperties: Map[String, String]): Unit = {
     // Get an explicitly configured resource URL
     // Fallback to a file in the conf directory if the resource wasn't found on the classpath
     def explicitResourceUrl = sys.props.get("logger.resource").map { r =>
@@ -69,7 +46,7 @@ class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
   }
 
 
-  def configure(properties: Map[String, String], config: Option[URL]): Unit = {
+  override def configure(properties: Map[String, String], config: Option[URL]): Unit = {
 
     loggerFactory.synchronized {
       // Redirect JUL -> SL4FJ
@@ -116,17 +93,5 @@ class LogbackGroovyLoggerConfigurator extends LoggerConfigurator {
     val frameworkPackages = loggerContext.getFrameworkPackages
     frameworkPackages.add(classOf[play.Logger].getName)
     frameworkPackages.add(classOf[play.api.Logger].getName)
-
-
-  }
-    /**
-    * Shutdown the logger infrastructure.
-    */
-  def shutdown(): Unit = {
-
-    val ctx = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
-    ctx.stop()
-
-    org.slf4j.bridge.SLF4JBridgeHandler.uninstall()
   }
 }
