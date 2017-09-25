@@ -31,3 +31,5 @@ developers := List(
 publishMavenStyle := true
 
 publishTo := Some("Sonatype Release Nexus" at "https://oss.sonatype.org/content/repositories/releases")
+
+useGpg := true
