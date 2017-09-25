@@ -14,7 +14,6 @@ import play.api.{Configuration, Environment, LoggerConfigurator, Mode}
 
 class LogbackGroovyLoggerConfigurator extends LogbackLoggerConfigurator {
 
-
   override def configure(env: Environment, configuration: Configuration, optionalProperties: Map[String, String]): Unit = {
     // Get an explicitly configured resource URL
     // Fallback to a file in the conf directory if the resource wasn't found on the classpath
